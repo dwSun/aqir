@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Main</title>
+    <script type="text/javascript" src="https://media.readthedocs.org/javascript/jquery/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            var longPoll = function() {
+              $.ajax({
+                type: "POST",
+                url: "poll",
+                cache: false,
+                success: function(data) {
+                    $("#messages").html(data);
+                },
+                dataType: 'json'
+              });
+            };
+            longPoll();
+            setInterval(longPoll,1000);
+            var longPoll30s = function() {
+              $.ajax({
+                type: "POST",
+                url: "poll30s",
+                cache: false,
+                success: function(data) {
+                    console.log(data);
+                    $("#m30s").html(data);
+                },
+                dataType: 'json'
+              });
+            };
+            longPoll30s();
+            setInterval(longPoll30s,30*1000);
+            var longPoll10m = function() {
+              $.ajax({
+                type: "POST",
+                url: "poll10m",
+                cache: false,
+                success: function(data) {
+                    console.log(data);
+                    $("#m10m").html(data);
+                },
+                dataType: 'json'
+              });
+            };
+            longPoll10m();
+            setInterval(longPoll10m,600*1000);
+        });
+    </script>
+</head>
+<body>
+    Realtime(/m^3):
+    <p id="messages">
+    </p>
+    average in 30S(/m^3):
+    <p id="m30s">
+    </p>
+    average in 10m(/m^3):
+    <p id="m10m">
+    </p>
+</body>
+</html>
