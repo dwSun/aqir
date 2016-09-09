@@ -1,5 +1,5 @@
-# Micro gevent chatroom.
-# ----------------------
+#!/usr/bin/env python3
+
 # Make things as simple as possible, but not simpler.
 from gevent import monkey; monkey.patch_all()
 from flask import Flask, render_template, request, json
