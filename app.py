@@ -12,7 +12,7 @@ from functools import reduce
 app = Flask(__name__)
 app.debug = True
 
-conn = pymongo.MongoClient("192.168.1.62",27017)
+conn = pymongo.MongoClient("127.0.0.1",27017)
 db = conn.aqir #连接库
 
 datas ={'msg':'None'}
@@ -30,14 +30,7 @@ def put():
 @app.route("/poll", methods=["POST"])
 def poll():
     x=list(db.log.find({},{'_id':0}).sort('_id', pymongo.DESCENDING).limit(1))[0]
-    keys = list(x.keys())
-    keys.sort()
-    outData = ''
-    for key in keys:
-        line = ' {0} = {1}<br/>'.format(key,x[key])
-        outData= outData + line
-
-    return json.dumps(outData)
+    return json.dumps(x)
 
 def add(d1,d2):
     d={}
@@ -62,15 +55,7 @@ def getDat(time):
             x[key] = int(x[key]/len(d))
     x['time'] = d[-1]['time'] +' ~ '+ d[0]['time']
 
-    keys = list(x.keys())
-    keys.sort()
-    outData = ''
-    for key in keys:
-        line = ' {0} = {1}<br/>'.format(key,x[key])
-        outData= outData + line
-    print(len(d))
-
-    return json.dumps(outData)
+    return json.dumps(x)
 
 
 if __name__ == "__main__":

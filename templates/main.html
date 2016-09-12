@@ -1,64 +1,206 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Main</title>
-    <script type="text/javascript" src="https://media.readthedocs.org/javascript/jquery/jquery-2.0.3.min.js"></script>
+    <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
     <script type="text/javascript" charset="utf-8">
-        $(document).ready(function() {
-            var longPoll = function() {
-              $.ajax({
-                type: "POST",
-                url: "poll",
-                cache: false,
-                success: function(data) {
-                    $("#messages").html(data);
-                },
-                dataType: 'json'
-              });
+        var randomScalingFactor = function () {
+            return (Math.random() > 0.5 ? 1.0 : -1.0) * Math.round(Math.random() * 100);
+        };
+        var randomColorFactor = function () {
+            return Math.round(Math.random() * 255);
+        };
+        var randomColor = function () {
+            return 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',.7)';
+        };
+
+        var barDustData30s = {
+            labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
+            datasets: [{
+                label: 'Dust',
+                backgroundColor: randomColor(),
+                data: [],
+            }]
+        };
+
+        var barIndexData30s = {
+            labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
+            datasets: [{
+                label: 'Index',
+                backgroundColor: randomColor(),
+                data: [],
+            }]
+        };
+
+        var barDustData10m = {
+            labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
+            datasets: [{
+                label: 'Dust',
+                backgroundColor: randomColor(),
+                data: [],
+            }]
+        };
+
+        var barIndexData10m = {
+            labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
+            datasets: [{
+                label: 'Index',
+                backgroundColor: randomColor(),
+                data: [],
+            }]
+        };
+
+        var barDustData = {
+            labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
+            datasets: [{
+                label: 'Dust',
+                backgroundColor: randomColor(),
+                data: [],
+            }]
+        };
+
+        var barIndexData = {
+            labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
+            datasets: [{
+                label: 'Index',
+                backgroundColor: randomColor(),
+                data: [],
+            }]
+        };
+
+
+
+        var createChart = function (canvasid,dataset) {
+            var ctx = $(canvasid)[0].getContext("2d");
+            return new Chart(ctx, {
+                type: 'bar',
+                data: dataset,
+                options: {
+                    elements: {
+                        rectangle: {
+                            borderWidth: 2,
+                            borderColor: 'rgb(0, 255, 0)',
+                            borderSkipped: 'bottom'
+                        }
+                    },
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                }
+            });
+        };
+
+
+        $(document).ready(function () {
+            window.barDust = createChart("#barDust",barDustData);
+            window.barIndex = createChart("#barIndex", barIndexData);
+            window.barDust30s = createChart("#barDust30s", barDustData30s);
+            window.barIndex30s = createChart("#barIndex30s", barIndexData30s);
+            window.barDust10m = createChart("#barDust10m", barDustData10m);
+            window.barIndex10m = createChart("#barIndex10m", barIndexData10m);
+            var longPoll = function () {
+                $.ajax({
+                    type: "POST",
+                    url: "poll",
+                    cache: false,
+                    success: function (data) {
+                        barDustData.datasets[0].data = _.map(barDustData.labels, function (item) {
+                            return data[item];
+                        });
+                        barDustData.datasets[0].label = 'Dust: ' + data['time'];
+                        window.barDust.update();
+
+                        barIndexData.datasets[0].data = _.map(barIndexData.labels, function (item) {
+                            return data[item];
+                        });
+                        barIndexData.datasets[0].label = 'index: ' + data['time'];
+                        window.barIndex.update();
+                    },
+                    dataType: 'json'
+                });
             };
             longPoll();
-            setInterval(longPoll,1000);
-            var longPoll30s = function() {
-              $.ajax({
-                type: "POST",
-                url: "poll30s",
-                cache: false,
-                success: function(data) {
-                    console.log(data);
-                    $("#m30s").html(data);
-                },
-                dataType: 'json'
-              });
+            setInterval(longPoll, 1000);
+            var longPoll30s = function () {
+                $.ajax({
+                    type: "POST",
+                    url: "poll30s",
+                    cache: false,
+                    success: function (data) {
+                        barDustData30s.datasets[0].data = _.map(barDustData30s.labels, function (item) {
+                            return data[item];
+                        });
+                        barDustData30s.datasets[0].label = 'Dust: ' + data['time'];
+                        window.barDust30s.update();
+
+                        barIndexData30s.datasets[0].data = _.map(barIndexData30s.labels, function (item) {
+                            return data[item];
+                        });
+                        barIndexData30s.datasets[0].label = 'index: ' + data['time'];
+                        window.barIndex30s.update();
+
+                    },
+                    dataType: 'json'
+                });
             };
             longPoll30s();
-            setInterval(longPoll30s,30*1000);
-            var longPoll10m = function() {
-              $.ajax({
-                type: "POST",
-                url: "poll10m",
-                cache: false,
-                success: function(data) {
-                    console.log(data);
-                    $("#m10m").html(data);
-                },
-                dataType: 'json'
-              });
+            setInterval(longPoll30s, 30 * 1000);
+            var longPoll10m = function () {
+                $.ajax({
+                    type: "POST",
+                    url: "poll10m",
+                    cache: false,
+                    success: function (data) {
+                        barDustData10m.datasets[0].data = _.map(barDustData10m.labels, function (item) {
+                            return data[item];
+                        });
+                        barDustData10m.datasets[0].label = 'Dust: ' + data['time'];
+                        window.barDust10m.update();
+
+                        barIndexData10m.datasets[0].data = _.map(barIndexData10m.labels, function (item) {
+                            return data[item];
+                        });
+                        barIndexData10m.datasets[0].label = 'index: ' + data['time'];
+                        window.barIndex10m.update();
+                    },
+                    dataType: 'json'
+                });
             };
             longPoll10m();
-            setInterval(longPoll10m,600*1000);
+            setInterval(longPoll10m, 600 * 1000);
         });
     </script>
 </head>
+
 <body>
-    Realtime(/m^3):
-    <p id="messages">
-    </p>
-    average in 30S(/m^3):
-    <p id="m30s">
-    </p>
-    average in 10m(/m^3):
-    <p id="m10m">
-    </p>
+    <h1>Realtime(/m^3):</h1>
+
+    <div id="container" style="width: 75%;">
+        <canvas id="barDust"></canvas>
+        <canvas id="barIndex"></canvas>
+    </div>
+
+    <h1>average in 30S(/m^3):</h1>
+    <div id="container" style="width: 75%;">
+        <canvas id="barDust30s"></canvas>
+        <canvas id="barIndex30s"></canvas>
+    </div>
+
+    <h1>average in 10m(/m^3):</h1>
+    <div id="container" style="width: 75%;">
+        <canvas id="barDust10m"></canvas>
+        <canvas id="barIndex10m"></canvas>
+    </div>
+
 </body>
+
 </html>

@@ -21,7 +21,7 @@ def fun(data):
     return data.pop(0) * (2**8) + data.pop(0)
 
 while True:
-    conn = pymongo.MongoClient("192.168.1.62",27017)
+    conn = pymongo.MongoClient("127.0.0.1",27017)
     db = conn.aqir #连接库
     if ser.read() == b'B' and ser.read() == b'M':
         data = ser.read(2*13 + 2)
