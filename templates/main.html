@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.1/css/uikit.almost-flat.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.1/js/uikit.js"></script>
 
-<!--
+    <!--
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
@@ -27,11 +27,13 @@
             return 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',.7)';
         };
 
+        bgColor = [randomColor(), randomColor(), randomColor(), randomColor(), randomColor(), randomColor()];
+
         var barDustData30s = {
             labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
             datasets: [{
-                label: 'Dust',
-                backgroundColor: randomColor(),
+
+                backgroundColor: bgColor,
                 data: []
             }]
         };
@@ -39,8 +41,8 @@
         var barIndexData30s = {
             labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
             datasets: [{
-                label: 'Index',
-                backgroundColor: randomColor(),
+
+                backgroundColor: bgColor,
                 data: []
             }]
         };
@@ -48,8 +50,8 @@
         var barDustData10m = {
             labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
             datasets: [{
-                label: 'Dust',
-                backgroundColor: randomColor(),
+
+                backgroundColor: bgColor,
                 data: []
             }]
         };
@@ -57,8 +59,8 @@
         var barIndexData10m = {
             labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
             datasets: [{
-                label: 'Index',
-                backgroundColor: randomColor(),
+
+                backgroundColor: bgColor,
                 data: []
             }]
         };
@@ -66,8 +68,8 @@
         var barDustData = {
             labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
             datasets: [{
-                label: 'Dust',
-                backgroundColor: randomColor(),
+
+                backgroundColor: bgColor,
                 data: []
             }]
         };
@@ -75,15 +77,13 @@
         var barIndexData = {
             labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
             datasets: [{
-                label: 'Index',
-                backgroundColor: randomColor(),
+
+                backgroundColor: bgColor,
                 data: []
             }]
         };
 
-
-
-        var createChart = function (canvasid,dataset) {
+        var createChart = function (canvasid, dataset) {
             var ctx = $(canvasid)[0].getContext("2d");
             return new Chart(ctx, {
                 type: 'bar',
@@ -91,22 +91,17 @@
                 options: {
                     elements: {
                         rectangle: {
-                            borderWidth: 2,
-                            borderColor: 'rgb(0, 255, 0)',
+                            borderWidth: 3,
                             borderSkipped: 'bottom'
                         }
                     },
                     responsive: true,
-                    legend: {
-                        position: 'top',
-                    },
                 }
             });
         };
 
-
         $(document).ready(function () {
-            window.barDust = createChart("#barDust",barDustData);
+            window.barDust = createChart("#barDust", barDustData);
             window.barIndex = createChart("#barIndex", barIndexData);
             window.barDust30s = createChart("#barDust30s", barDustData30s);
             window.barIndex30s = createChart("#barIndex30s", barIndexData30s);
@@ -174,7 +169,7 @@
                         barIndexData10m.datasets[0].data = _.map(barIndexData10m.labels, function (item) {
                             return data[item];
                         });
-                        barIndexData10m.datasets[0].label = 'index: ' + data['time'];
+                        barIndexData10m.datasets[0].label = 'Index: ' + data['time'];
                         window.barIndex10m.update();
                     },
                     dataType: 'json'
@@ -215,7 +210,5 @@
             <canvas id="barIndex10m"></canvas>
         </div>
     </div>
-
 </body>
-
 </html>
