@@ -46,6 +46,7 @@ while True:
         out['dust5-0'] = fun(data)*10000
         out['dust10'] = fun(data)*10000
 
+        '''
         out['dust0-3']=out['dust0-3']-out['dust0-5']
 
         out['dust0-5']=out['dust0-5']-out['dust1-0']
@@ -55,7 +56,7 @@ while True:
         out['dust2-5']=out['dust2-5']-out['dust5-0']
 
         out['dust5-0']=out['dust5-0']-out['dust10']
-
+        '''
 
         out['empty'] = fun(data)
         out['time'] = str(datetime.datetime.now()).split('.')[0]
