@@ -60,5 +60,6 @@ while True:
 
         out['empty'] = fun(data)
         out['time'] = str(datetime.datetime.now()).split('.')[0]
+        out['timestamp'] = time.time()
         d=json.dumps(out)
         db.log.save(out)
