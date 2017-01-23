@@ -17,9 +17,14 @@ db = conn.aqir #连接库
 
 datas ={'msg':'None'}
 
+
 @app.route('/')
 def choose_name():
     return render_template('main.html')
+
+@app.route('/new')
+def new():
+    return render_template('main2.html')
 
 @app.route("/put", methods=["POST"])
 def put():
@@ -57,6 +62,17 @@ def getDat(time):
 
     return json.dumps(x)
 
+@app.route("/period", methods=["GET"])
+def periodG():
+    d=list(db.log.find({},{'_id':0}).sort('_id', pymongo.DESCENDING).limit(100))
+    d.reverse()
+
+    return json.dumps(d)
+
+@app.route("/period", methods=["POST"])
+def periodP():
+    x=list(db.log.find({},{'_id':0}).sort('_id', pymongo.DESCENDING).limit(1))[0]
+    return json.dumps(x)
 
 if __name__ == "__main__":
     http = WSGIServer(('0.0.0.0', 5001), app)

@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Main</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.1/css/uikit.almost-flat.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.1/js/uikit.js"></script>
+
+    <!--
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
+-->
+    <script type="text/javascript" charset="utf-8">
+        var randomScalingFactor = function () {
+            return (Math.random() > 0.5 ? 1.0 : -1.0) * Math.round(Math.random() * 100);
+        };
+        var randomColorFactor = function () {
+            return Math.round(Math.random() * 255);
+        };
+        var randomColor = function () {
+            return 'rgba(' + randomColorFactor() + ',' + randomColorFactor() + ',' + randomColorFactor() + ',.7)';
+        };
+
+        bgColor = [randomColor(), randomColor(), randomColor(), randomColor(), randomColor(), randomColor()];
+
+        var linesDustData = {
+            labels:[],
+            datasets: [
+                {
+                    label: "dust0-3",
+                    backgroundColor: bgColor[0],
+                    borderColor: bgColor[0],
+                    data: [],
+                    fill: false
+                },{
+                    label: "dust0-5",
+                    backgroundColor: bgColor[1],
+                    borderColor: bgColor[1],
+                    data: [],
+                    fill: false
+                },{
+                    label: "dust1-0",
+                    backgroundColor: bgColor[2],
+                    borderColor: bgColor[2],
+                    data: [],
+                    fill: false
+                },{
+                    label: "dust10",
+                    backgroundColor: bgColor[3],
+                    borderColor: bgColor[3],
+                    data: [],
+                    fill: false
+                },{
+                    label: "dust2-5",
+                    backgroundColor: bgColor[4],
+                    borderColor: bgColor[4],
+                    data: [],
+                    fill: false
+                },{
+                    label: "dust5-0",
+                    backgroundColor: bgColor[5],
+                    borderColor: bgColor[5],
+                    data: [],
+                    fill: false
+                },
+            ]
+        };
+
+        var linesIndexData = {
+            labels:[],
+            datasets: [
+                {
+                    label: "pm1-0_atm",
+                    backgroundColor: bgColor[0],
+                    borderColor: bgColor[0],
+                    data: [],
+                    fill: false
+                },{
+                    label: "pm1-0_std",
+                    backgroundColor: bgColor[1],
+                    borderColor: bgColor[1],
+                    data: [],
+                    fill: false
+                },{
+                    label: "pm10_atm",
+                    backgroundColor: bgColor[2],
+                    borderColor: bgColor[2],
+                    data: [],
+                    fill: false
+                },{
+                    label: "pm10_std",
+                    backgroundColor: bgColor[3],
+                    borderColor: bgColor[3],
+                    data: [],
+                    fill: false
+                },{
+                    label: "pm2-5_atm",
+                    backgroundColor: bgColor[4],
+                    borderColor: bgColor[4],
+                    data: [],
+                    fill: false
+                },{
+                    label: "pm2-5_std",
+                    backgroundColor: bgColor[5],
+                    borderColor: bgColor[5],
+                    data: [],
+                    fill: false
+                },
+            ]
+        };
+
+        var createChart = function (canvasid, dataset) {
+            var ctx = $(canvasid)[0].getContext("2d");
+            return new Chart(ctx, {
+                type: 'line',
+                data: dataset,
+                options: {
+                    scales: {
+                        xAxes: [{
+                            id: 'ttt',
+                            type: 'time',
+                            round:'second',
+                            minUnit:'second',
+                        }]
+                    },
+                    responsive: true,
+                }
+            });
+        };
+
+        var pushData = function(sets,data){
+            if(sets.labels.length>100){
+                sets.labels.shift();
+            }
+            sets.labels.push(data['timestamp']);
+
+            _.each(sets.datasets, function(element){
+                _.each(data,function(v,k){
+                    if (k == element.label) {
+                        if(element.data.length>100){
+                            element.data.shift();
+                        }
+                        element.data.push(v);
+                    }
+                });
+            });
+        };
+
+        $(document).ready(function () {
+            window.linesDust = createChart("#linesDust", linesDustData);
+            window.linesIndex = createChart("#linesIndex", linesIndexData);
+
+            var longPoll = function () {
+                $.ajax({
+                    type: "post",
+                    url: "period",
+                    cache: false,
+                    success: function (data) {
+                        pushData(linesDustData, data);
+                        window.linesDust.update();
+                        pushData(linesIndexData, data);
+                        window.linesIndex.update();
+                    },
+                    dataType: 'json'
+                });
+            };
+
+            $.ajax({
+                type: "get",
+                url: "period",
+                cache: false,
+                success: function (datas) {
+                    _.each(datas,function(data){
+                        pushData(linesDustData, data);
+                        pushData(linesIndexData, data);
+                    });
+                    window.linesDust.update();
+                    window.linesIndex.update();
+                    longPoll();
+                    setInterval(longPoll, 1000);
+                },
+                dataType: 'json'
+            });
+
+        });
+    </script>
+</head>
+
+<body>
+    <div class='uk-grid uk-grid-width-1-1'>
+        <div>
+            <canvas id="linesDust"></canvas>
+        </div>
+        <div>
+            <canvas id="linesIndex"></canvas>
+        </div>
+    </div>
+</body>
+</html>
