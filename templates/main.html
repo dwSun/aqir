@@ -5,7 +5,8 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Main</title>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.1/css/uikit.almost-flat.css">
@@ -29,40 +30,102 @@
 
         bgColor = [randomColor(), randomColor(), randomColor(), randomColor(), randomColor(), randomColor()];
 
-        var barDustData30s = {
-            labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
-            datasets: [{
-
-                backgroundColor: bgColor,
-                data: []
-            }]
+        var linesDustData = {
+            labels:[],
+            datasets: [
+                {
+                    label: "dust0-3",
+                    backgroundColor: bgColor[0],
+                    borderColor: bgColor[0],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "dust0-5",
+                    backgroundColor: bgColor[1],
+                    borderColor: bgColor[1],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "dust1-0",
+                    backgroundColor: bgColor[2],
+                    borderColor: bgColor[2],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "dust10",
+                    backgroundColor: bgColor[3],
+                    borderColor: bgColor[3],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "dust2-5",
+                    backgroundColor: bgColor[4],
+                    borderColor: bgColor[4],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "dust5-0",
+                    backgroundColor: bgColor[5],
+                    borderColor: bgColor[5],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },
+            ]
         };
 
-        var barIndexData30s = {
-            labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
-            datasets: [{
-
-                backgroundColor: bgColor,
-                data: []
-            }]
-        };
-
-        var barDustData10m = {
-            labels: ["dust0-3", "dust0-5", "dust1-0", "dust10", "dust2-5", "dust5-0"],
-            datasets: [{
-
-                backgroundColor: bgColor,
-                data: []
-            }]
-        };
-
-        var barIndexData10m = {
-            labels: ["pm1-0_atm", "pm1-0_std", "pm10_atm", "pm10_std", "pm2-5_atm", "pm2-5_std"],
-            datasets: [{
-
-                backgroundColor: bgColor,
-                data: []
-            }]
+        var linesIndexData = {
+            labels:[],
+            datasets: [
+                {
+                    label: "pm1-0_atm",
+                    backgroundColor: bgColor[0],
+                    borderColor: bgColor[0],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "pm1-0_std",
+                    backgroundColor: bgColor[1],
+                    borderColor: bgColor[1],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "pm10_atm",
+                    backgroundColor: bgColor[2],
+                    borderColor: bgColor[2],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "pm10_std",
+                    backgroundColor: bgColor[3],
+                    borderColor: bgColor[3],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "pm2-5_atm",
+                    backgroundColor: bgColor[4],
+                    borderColor: bgColor[4],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },{
+                    label: "pm2-5_std",
+                    backgroundColor: bgColor[5],
+                    borderColor: bgColor[5],
+                    data: [],
+                    fill: false,
+                    pointRadius:0
+                },
+            ]
         };
 
         var barDustData = {
@@ -83,7 +146,7 @@
             }]
         };
 
-        var createChart = function (canvasid, dataset) {
+        var createBarChart = function (canvasid, dataset) {
             var ctx = $(canvasid)[0].getContext("2d");
             return new Chart(ctx, {
                 type: 'bar',
@@ -100,19 +163,67 @@
             });
         };
 
+        var createLineChart = function (canvasid, dataset) {
+            var ctx = $(canvasid)[0].getContext("2d");
+            return new Chart(ctx, {
+                type: 'line',
+                data: dataset,
+                options: {
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                displayFormats: {
+                                    quarter: 'MMM YYYY'
+                                }
+                            }
+                        }]
+                    },
+                    responsive: true,
+                }
+            });
+        };
+
+        var pushData = function(sets,data){
+            if(sets.labels[sets.labels.length-1] == data['timestamp']*1000){
+                return;
+            }
+
+            if(sets.labels.length>500){
+                sets.labels.shift();
+            }
+            sets.labels.push(data['timestamp']*1000);
+
+            _.each(sets.datasets, function(element){
+                _.each(data,function(v,k){
+                    if (k == element.label) {
+                        if(element.data.length>500){
+                            element.data.shift();
+                        }
+                        element.data.push(v);
+                    }
+                });
+            });
+        };
+
         $(document).ready(function () {
-            window.barDust = createChart("#barDust", barDustData);
-            window.barIndex = createChart("#barIndex", barIndexData);
-            window.barDust30s = createChart("#barDust30s", barDustData30s);
-            window.barIndex30s = createChart("#barIndex30s", barIndexData30s);
-            window.barDust10m = createChart("#barDust10m", barDustData10m);
-            window.barIndex10m = createChart("#barIndex10m", barIndexData10m);
+            window.linesDust = createLineChart("#linesDust", linesDustData);
+            window.linesIndex = createLineChart("#linesIndex", linesIndexData);
+            window.barDust = createBarChart("#barDust", barDustData);
+            window.barIndex = createBarChart("#barIndex", barIndexData);
+
+
             var longPoll = function () {
                 $.ajax({
-                    type: "POST",
-                    url: "poll",
+                    type: "get",
+                    url: "period",
                     cache: false,
                     success: function (data) {
+                        pushData(linesDustData, data);
+                        window.linesDust.update();
+                        pushData(linesIndexData, data);
+                        window.linesIndex.update();
+
                         barDustData.datasets[0].data = _.map(barDustData.labels, function (item) {
                             return data[item];
                         });
@@ -128,86 +239,43 @@
                     dataType: 'json'
                 });
             };
-            longPoll();
-            setInterval(longPoll, 1000);
-            var longPoll30s = function () {
-                $.ajax({
-                    type: "POST",
-                    url: "poll30s",
-                    cache: false,
-                    success: function (data) {
-                        barDustData30s.datasets[0].data = _.map(barDustData30s.labels, function (item) {
-                            return data[item];
-                        });
-                        barDustData30s.datasets[0].label = 'Dust: ' + data['time'];
-                        window.barDust30s.update();
 
-                        barIndexData30s.datasets[0].data = _.map(barIndexData30s.labels, function (item) {
-                            return data[item];
-                        });
-                        barIndexData30s.datasets[0].label = 'index: ' + data['time'];
-                        window.barIndex30s.update();
+            $.ajax({
+                type: "get",
+                url: "last",
+                cache: false,
+                success: function (datas) {
+                    _.each(datas,function(data){
+                        pushData(linesDustData, data);
+                        pushData(linesIndexData, data);
+                    });
+                    window.linesDust.update();
+                    window.linesIndex.update();
+                    longPoll();
+                    setInterval(longPoll, 1000);
+                },
+                dataType: 'json'
+            });
 
-                    },
-                    dataType: 'json'
-                });
-            };
-            longPoll30s();
-            setInterval(longPoll30s, 30 * 1000);
-            var longPoll10m = function () {
-                $.ajax({
-                    type: "POST",
-                    url: "poll10m",
-                    cache: false,
-                    success: function (data) {
-                        barDustData10m.datasets[0].data = _.map(barDustData10m.labels, function (item) {
-                            return data[item];
-                        });
-                        barDustData10m.datasets[0].label = 'Dust: ' + data['time'];
-                        window.barDust10m.update();
-
-                        barIndexData10m.datasets[0].data = _.map(barIndexData10m.labels, function (item) {
-                            return data[item];
-                        });
-                        barIndexData10m.datasets[0].label = 'Index: ' + data['time'];
-                        window.barIndex10m.update();
-                    },
-                    dataType: 'json'
-                });
-            };
-            longPoll10m();
-            setInterval(longPoll10m, 600 * 1000);
         });
     </script>
 </head>
 
 <body>
-    <h1>Realtime(/m^3):</h1>
-
+    <div class='uk-grid uk-grid-width-1-2'>
+        <div>
+            <canvas id="linesDust"></canvas>
+        </div>
+        <div>
+            <canvas id="linesIndex"></canvas>
+        </div>
+    </div>
     <div class='uk-grid uk-grid-width-1-2'>
         <div>
             <canvas id="barDust"></canvas>
         </div>
         <div>
             <canvas id="barIndex"></canvas>
-        </div>
-    </div>
-    <h1>average in 30S(/m^3):</h1>
-    <div class='uk-grid uk-grid-width-1-2'>
-        <div>
-            <canvas id="barDust30s"></canvas>
-        </div>
-        <div>
-            <canvas id="barIndex30s"></canvas>
-        </div>
-    </div>
-    <h1>average in 10m(/m^3):</h1>
-    <div class='uk-grid uk-grid-width-1-2'>
-        <div>
-            <canvas id="barDust10m"></canvas>
-        </div>
-        <div>
-            <canvas id="barIndex10m"></canvas>
         </div>
     </div>
 </body>
