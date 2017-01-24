@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # Make things as simple as possible, but not simpler.
 from gevent import monkey; monkey.patch_all()
