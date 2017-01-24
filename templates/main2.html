@@ -136,14 +136,14 @@
         };
 
         var pushData = function(sets,data){
-            if(sets.labels[sets.labels.length-1] == data['timestamp']){
+            if(sets.labels[sets.labels.length-1] == data['timestamp']*1000){
                 return;
             }
 
             if(sets.labels.length>100){
                 sets.labels.shift();
             }
-            sets.labels.push(data['timestamp']);
+            sets.labels.push(data['timestamp']*1000);
 
             _.each(sets.datasets, function(element){
                 _.each(data,function(v,k){
