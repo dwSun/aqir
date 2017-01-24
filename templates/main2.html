@@ -136,6 +136,10 @@
         };
 
         var pushData = function(sets,data){
+            if(sets.labels[sets.labels.length-1] == data['timestamp']){
+                return;
+            }
+
             if(sets.labels.length>100){
                 sets.labels.shift();
             }
