@@ -4,8 +4,7 @@ import json
 from bson.objectid import ObjectId
 import time
 from multiprocessing.dummy import Pool
-
-
+import pymongo
 
 from logger import Logger
 
@@ -14,7 +13,7 @@ db = conn.aqir #连接库
 
 l = Logger('backup.log', log_f=True)
 trace = l.trace
-log = l.getlog()
+ll = l.getlog()
 
 limit = 100
 api = 'http://192.168.1.199:5001/api/record/{0}/'
@@ -34,7 +33,7 @@ def retrieve(idx):
         db.log.save(log)
         r = requests.delete(api.format(idx), timeout=60)
     except requests.exceptions.ConnectionError as ex:
-        log.error('failed with[{0}]'.format(ex))
+        ll.error('failed with[{0}]'.format(ex))
 
 
 def main():
@@ -43,16 +42,16 @@ def main():
         ret = r.json()
         log = ret['payload']['data']
         count = ret['payload']['count']
-        if count < 10:
-            log.debug('remote count[{0}], stop retrieve'.format(count))
+        if count < 1000:
+            ll.debug('remote count[{0}], stop retrieve'.format(count))
             break
-        pool = Pool(32)
+        pool = Pool()
         pool.map(retrieve, log)
         pool.close()
         pool.join()
 
         lcount = db.log.count()
-        log.debug('remote count[{0}] local count[{1}]'.format(count, lcount))
+        ll.debug('remote count[{0}] local count[{1}]'.format(count, lcount))
 
 
 if __name__ == '__main__':
