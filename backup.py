@@ -1,23 +1,59 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-import pymongo
-from pymongo import DeleteOne
-
-conn_bak = pymongo.MongoClient("127.0.0.1", 27017)
-db_bak = conn_bak.aqir
-
-conn = pymongo.MongoClient("192.168.1.199", 27017)
-db = conn.aqir
+import requests
+import json
+from bson.objectid import ObjectId
+import time
+from multiprocessing.dummy import Pool
 
 
-while db.log.count() > 1000:
-    print(db.log.count())
-    origs = list(db.log.find().sort('_id').limit(100))
-    rqs = []
-    for log in origs:
-        db_bak.log.save(log)
-        db.log.delete_one({'_id': log['_id']})
 
-print('done')
-print(db.log.count())
+from logger import Logger
+
+conn = pymongo.MongoClient("127.0.0.1",27017)
+db = conn.aqir #连接库
+
+l = Logger('backup.log', log_f=True)
+trace = l.trace
+log = l.getlog()
+
+limit = 100
+api = 'http://192.168.1.199:5001/api/record/{0}/'
+
+apiLimit = api.format('?limit={0}'.format(limit))
+
+
+def retrieve(idx):
+    try:
+        r = requests.get(api.format(idx), timeout=60)
+        ret = r.json()
+        log = ret['payload']['data']
+        idx = log['_id']
+
+        log['_id'] = ObjectId(idx)
+
+        db.log.save(log)
+        r = requests.delete(api.format(idx), timeout=60)
+    except requests.exceptions.ConnectionError as ex:
+        log.error('failed with[{0}]'.format(ex))
+
+
+def main():
+    while True:
+        r = requests.get(apiLimit, timeout=60)
+        ret = r.json()
+        log = ret['payload']['data']
+        count = ret['payload']['count']
+        if count < 10:
+            log.debug('remote count[{0}], stop retrieve'.format(count))
+            break
+        pool = Pool(32)
+        pool.map(retrieve, log)
+        pool.close()
+        pool.join()
+
+        lcount = db.log.count()
+        log.debug('remote count[{0}] local count[{1}]'.format(count, lcount))
+
+
+if __name__ == '__main__':
+    main()
