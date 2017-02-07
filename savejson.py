@@ -20,7 +20,7 @@ def main():
         while db.log.count() > 100000:
             ll.debug('db count[{0}]'.format(db.log.count()))
             ids = []
-            for log in db.log.find().limit(100):
+            for log in db.log.find().limit(1000):
                 idx = log['_id']
                 ids.append(idx)
                 log['_id'] = str(idx)
