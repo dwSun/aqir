@@ -7,13 +7,12 @@ from flask import Flask, render_template, request, json
 
 from gevent.pywsgi import WSGIServer
 import pymongo
-from record import app as record
 
 app = Flask(__name__)
 app.debug = True
 
-conn = pymongo.MongoClient("127.0.0.1",27017)
-db = conn.aqir #连接库
+conn = pymongo.MongoClient("127.0.0.1", 27017)
+db = conn.aqir  # 连接库
 
 
 @app.route('/')
@@ -34,8 +33,6 @@ def periodP():
     x = list(db.log.find({}, {'_id': 0}).sort('_id', pymongo.DESCENDING).limit(1))[0]
     return json.dumps(x)
 
-
-app.register_blueprint(record, url_prefix='/api')
 
 if __name__ == "__main__":
     http = WSGIServer(('0.0.0.0', 5001), app)
