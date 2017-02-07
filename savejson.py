@@ -20,12 +20,13 @@ def main():
         while db.log.count() > 100000:
             ll.debug('db count[{0}]'.format(db.log.count()))
             ids = []
-            for log in db.log.find().limit(10000):
+            for log in db.log.find().limit(100):
                 idx = log['_id']
                 ids.append(idx)
                 log['_id'] = str(idx)
                 ojson.write(json.dumps(log))
-                
+                ojson.write('\n')
+
             for idx in ids:
                 db.log.delete_one({"_id": idx})
 
