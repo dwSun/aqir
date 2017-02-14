@@ -16,6 +16,7 @@ log = l.getlog()
 
 
 def handle_json(f):
+    log.debug('handle [{0}]'.format(f))
     with open(f) as jsons:
         for rec in jsons:
             weather = json.loads(rec)
@@ -33,7 +34,10 @@ def main():
     for r, d, fs in os.walk('./jsons'):
         for f in fs:
             f = os.path.join(r, f)
-            handle_json(f)
+            if f.endswith('.json'):
+                handle_json(f)
+            else:
+                log.debug('skip [{0}]'.format(f))
 
 
 if __name__ == '__main__':
