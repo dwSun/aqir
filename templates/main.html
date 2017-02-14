@@ -189,7 +189,7 @@
                 return;
             }
 
-            if(sets.labels.length>500){
+            if(sets.labels.length>1000){
                 sets.labels.shift();
             }
             sets.labels.push(data['timestamp']*1000);
@@ -197,7 +197,7 @@
             _.each(sets.datasets, function(element){
                 _.each(data,function(v,k){
                     if (k == element.label) {
-                        if(element.data.length>500){
+                        if(element.data.length>1000){
                             element.data.shift();
                         }
                         element.data.push(v);

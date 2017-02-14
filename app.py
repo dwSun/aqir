@@ -22,7 +22,7 @@ def choose_name():
 
 @app.route("/last", methods=["GET"])
 def last():
-    d = list(db.log.find({}, {'_id': 0}).sort('_id', pymongo.DESCENDING).limit(500))
+    d = list(db.log.find({}, {'_id': 0}).sort('_id', pymongo.DESCENDING).limit(1000))
     d.reverse()
 
     return json.dumps(d)
