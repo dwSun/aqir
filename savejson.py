@@ -17,7 +17,7 @@ ll = l.getlog()
 def main():
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            str(datetime.datetime.now()) + '.json'), 'w') as ojson:
-        while db.log.count() > 100000:
+        while db.log.count() > 2000:
             ll.debug('db count[{0}]'.format(db.log.count()))
             ids = []
             for log in db.log.find().limit(1000):

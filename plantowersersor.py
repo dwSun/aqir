@@ -3,10 +3,8 @@
 
 import time
 import datetime
-import requests
 import serial
 import pymongo
-
 
 
 ser = serial.Serial( #下面这些参数根据情况修改
@@ -29,8 +27,6 @@ while True:
         data = ser.read(2*13 + 2)
         data = list(map(int,data))
         par = ser.read(2)
-        print(data)
-        print(par)
         out = {}
         out['datalen'] = fun(data)
         out['pm1-0_std'] = fun(data)
