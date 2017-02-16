@@ -7,3 +7,4 @@ itsdangerous
 click
 flask-restful
 requests
+flask-compressor

@@ -4,12 +4,13 @@
 # Make things as simple as possible, but not simpler.
 from gevent import monkey; monkey.patch_all()
 from flask import Flask, render_template, request, json
+from flask.ext.compressor import Compressor
 
 from gevent.pywsgi import WSGIServer
 import pymongo
 
 app = Flask(__name__)
-app.debug = True
+compressor = Compressor(app)
 
 conn = pymongo.MongoClient("127.0.0.1", 27017)
 db = conn.aqir  # 连接库
