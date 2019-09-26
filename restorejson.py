@@ -4,6 +4,7 @@ import json
 from bson.objectid import ObjectId
 import os
 import pymongo
+from multiprocessing.dummy import Pool
 
 from logger import Logger
 
@@ -31,14 +32,21 @@ def handle_json(f):
 
 
 def main():
+    jsons = []
+    
     for r, d, fs in os.walk('./jsons'):
         for f in fs:
             f = os.path.join(r, f)
             if f.endswith('.json'):
-                handle_json(f)
+                jsons.append(f)
+#                handle_json(f)
             else:
                 log.debug('skip [{0}]'.format(f))
 
-
+    p=Pool(16)
+    p.map(handle_json, jsons)
+    p.close()
+    p.join()
+    
 if __name__ == '__main__':
     main()

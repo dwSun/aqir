@@ -26,8 +26,6 @@ def fun(data):
 time.sleep(5)
 
 while True:
-    conn = pymongo.MongoClient("127.0.0.1", 27017)
-    db = conn.aqir  # 连接库
     if ser.read() == b'B' and ser.read() == b'M':
         data = ser.read(2 * 13 + 2)
         data = list(map(int, data))
@@ -65,4 +63,4 @@ while True:
         out['time'] = str(datetime.datetime.now()).split('.')[0]
         out['timestamp'] = time.time()
         d = json.dumps(out)
-        db.log.save(out)
+        print(d)
